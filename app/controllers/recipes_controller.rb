@@ -1,3 +1,5 @@
+include Pundit
+
 class RecipesController < ApplicationController
   before_action :set_recipe, only: %i[ show edit update destroy ]
 
@@ -8,7 +10,9 @@ class RecipesController < ApplicationController
 
   # GET /recipes/1 or /recipes/1.json
   def show
-  end
+    @recipe = Recipe.find(params[:id])
+    @ingredient = Ingredient.new(recipe: @recipe)
+  end  
 
   # GET /recipes/new
   def new
@@ -17,6 +21,8 @@ class RecipesController < ApplicationController
 
   # GET /recipes/1/edit
   def edit
+    @recipe = Recipe.find(params[:id])
+    authorize @recipe
   end
 
   # POST /recipes or /recipes.json
@@ -66,5 +72,9 @@ class RecipesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def recipe_params
       params.require(:recipe).permit(:title, :description, :creator_id)
+    end
+
+    def user_not_authorized
+      redirect_to(recipe_path(@recipe), alert: "You are not authorized to edit this recipe.")
     end
 end
